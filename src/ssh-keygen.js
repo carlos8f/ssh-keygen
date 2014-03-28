@@ -79,11 +79,5 @@ module.exports = function(opts, callback){
 
 	if(_.isUndefined(opts.read)) opts.read = true;
 
-	checkAvailability(location, opts.force, function(err){
-		if(err){
-			log('availability err '+err);
-			return callback(err);
-		}
-		ssh_keygen(location, opts, callback);
-	});
+	ssh_keygen(location, opts, callback);
 };
