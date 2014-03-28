@@ -7,37 +7,7 @@ var path = require('path');
 var log = function(a){
 	if(process.env.VERBOSE) console.log('ssh-keygen: '+a);
 }
-function checkAvailability(location, force, callback){
-	var pubLocation = location+'.pub';
-	log('checking availability: '+location);
-	fs.exists(location, function(keyExists){
-		log('checking availability: '+pubLocation);
-		fs.exists(pubLocation, function(pubKeyExists){
-			doForce(keyExists, pubKeyExists);
-		})
-	});
-	function doForce(keyExists, pubKeyExists){
-		if(!force && keyExists) return callback(location+' already exists');
-		if(!force && pubKeyExists) return callback(pubLocation+' already exists');
-		if(!keyExists && !pubKeyExists) return callback();
-		if(keyExists){ 
-			log('removing '+location);
-			fs.unlink(location, function(err){
-				if(err) return callback(err);
-				keyExists = false;
-				if(!keyExists && !pubKeyExists) callback();
-			});
-		}
-		if(pubKeyExists) {
-			log('removing '+pubLocation);
-			fs.unlink(pubLocation, function(err){
-				if(err) return callback(err);
-				pubKeyExists = false;
-				if(!keyExists && !pubKeyExists) callback();
-			});
-		}
-	}
-}
+
 function ssh_keygen(location, opts, callback){
 	opts || (opts={});
 
@@ -99,8 +69,6 @@ module.exports = function(opts, callback){
 	if(!location) location = path.join(os.tmpDir(),'id_rsa');
 
 	if(_.isUndefined(opts.read)) opts.read = true;
-	if(_.isUndefined(opts.force)) opts.force = true;
-	if(_.isUndefined(opts.destroy)) opts.destroy = true;
 
 	checkAvailability(location, opts.force, function(err){
 		if(err){
