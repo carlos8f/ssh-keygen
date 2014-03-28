@@ -50,7 +50,8 @@ function ssh_keygen(location, opts, callback){
 		'-b', opts.bits || '2048',
 		'-C', opts.comment,
 		'-N', opts.password,
-		'-f', location
+		'-f', location,
+		opts.fingerprint ? '-l' : ''
 	]);
 
 	keygen.stdout.on('data', function(a){
