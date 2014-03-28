@@ -24,14 +24,23 @@ function ssh_keygen(location, opts, callback){
 		opts.fingerprint ? '-l' : ''
 	]);
 
+	if (opts.fingerprint) {
+		var fingerprint = '';
+		keygen.stdout.on('end', function () {
+			callback(null, fingerprint);
+		});
+	}
+
 	keygen.stdout.on('data', function(a){
 		log('stdout:'+a);
+		if (opts.fingerprint) fingerprint = fingerprint + a;
 	});
 
 	var read = opts.read;
 	var destroy = opts.destroy;
 
 	keygen.on('exit',function(){
+		if (opts.fingerprint) return;
 		log('exited');
 		if(read){
 			log('reading key '+location);
