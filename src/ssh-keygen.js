@@ -47,7 +47,7 @@ function ssh_keygen(location, opts, callback){
 
 	var keygen = spawn('ssh-keygen', [
 		'-t','rsa',
-		'-b','2048',
+		'-b', opts.bits || '2048',
 		'-C', opts.comment,
 		'-N', opts.password,
 		'-f', location
