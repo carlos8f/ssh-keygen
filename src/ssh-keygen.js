@@ -48,23 +48,33 @@ function ssh_keygen(location, opts, callback) {
 
   var read = opts.read;
   var destroy = opts.destroy;
+  var stderr = '';
 
   keygen.on('exit',function(){
-    if (opts.fingerprint) return;
-    log('exited');
-    if (read) {
-      log('reading key '+location);
-      fs.readFile(location, 'utf8', function(err, key) {     
-        log('reading pub key ' + pubLocation);
-        fs.readFile(pubLocation, 'utf8', function(err, pubKey) {
-          callback(null, { key: key, pubKey: pubKey });
-        });
+    fs.exists(location, function (keyExists) {
+      if (!keyExists) return callback(new Error('failed to generate key: ' + stderr));
+      fs.exists(pubLocation, function (keyExists) {
+        if (!keyExists) return callback(new Error('failed to generate pubkey: ' + stderr));
+        if (opts.fingerprint) return;
+        log('exited');
+        if (read) {
+          log('reading key '+location);
+          fs.readFile(location, 'utf8', function(err, key) {
+            if (err) return callback(err);
+            log('reading pub key ' + pubLocation);
+            fs.readFile(pubLocation, 'utf8', function(err, pubKey) {
+              if (err) return callback(err);
+              callback(null, { key: key, pubKey: pubKey });
+            });
+          });
+        } else if (callback) callback();
       });
-    } else if (callback) callback();
+    });
   });
 
   keygen.stderr.on('data',function(a){
     log('stderr:'+a);
+    stderr += a;
     fingerprint = fingerprint + a;
   });
 };
